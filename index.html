@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verificación oficial de mamá</title>
+<style>
+  :root {
+    --deep: #281a35;
+    --purple: #67427f;
+    --light-purple: #806096;
+    --lavender: #f3edf4;
+    --lavender-dark: #d7c9dc;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(12px, 3vw, 32px);
+    color: #34243b;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    /* some stars in the background */
+    background-color: var(--deep);
+    background-image:
+      radial-gradient(2px 2px at 10% 20%, #fff 50%, transparent 51%),
+      radial-gradient(2px 2px at 60% 12%, #d9c5ff 50%, transparent 51%),
+      radial-gradient(2px 2px at 85% 70%, #fff 50%, transparent 51%),
+      radial-gradient(2px 2px at 25% 85%, #d9c5ff 50%, transparent 51%);
+  }
+
+  .card {
+    width: 100%;
+    max-width: 620px;
+    background: var(--lavender);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    border-radius: 18px;
+    padding: clamp(24px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.28);
+  }
+
+  #statusText { margin: 0 0 8px; font-size: 0.85rem; letter-spacing: 0.03em; color: var(--purple); }
+  .bar { height: 7px; background: var(--lavender-dark); border-radius: 4px; margin-bottom: 24px; overflow: hidden; }
+  #barFill { height: 100%; width: 0; background: var(--purple); transition: width 0.5s; }
+
+  h1, h2 { font-family: Georgia, serif; margin: 0 0 12px; line-height: 1.2; }
+  h1 { font-size: clamp(1.8rem, 4vw, 2.2rem); }
+  h2 { font-size: clamp(1.6rem, 3.5vw, 2rem); }
+  p { font-size: clamp(1.1rem, 2vw, 1.25rem); line-height: 1.5; margin: 0 0 20px; }
+  .note { font-size: 0.85rem; color: var(--purple); margin: 18px 0 0; }
+  #finalMessage { white-space: pre-line; text-align: left; }
+
+  .buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .buttons.column { flex-direction: column; align-items: center; }
+  button {
+    min-height: 52px;
+    padding: 12px 24px;
+    border: 2px solid var(--purple);
+    border-radius: 9px;
+    background: var(--purple);
+    color: white;
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+    max-width: 100%;
+  }
+  button:hover { background: var(--light-purple); }
+  button:focus-visible { outline: 3px solid var(--light-purple); outline-offset: 3px; }
+  button.secondary { background: transparent; color: var(--purple); }
+
+  /* custom divs cake... lol */
+  .cake { width: 240px; margin: 30px auto 24px; }
+  .candles { display: flex; justify-content: center; gap: 30px; }
+  .candle { position: relative; width: 10px; height: 34px; background: white; border-radius: 3px; }
+  .flame {
+    position: absolute;
+    top: -17px;
+    left: -1px;
+    width: 12px;
+    height: 18px;
+    background: radial-gradient(#fff6c2, #ffb73a);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    animation: flicker 0.4s ease-in-out infinite alternate;
+  }
+  .flame.out { display: none; }
+  @keyframes flicker { to { transform: scale(1.15, 0.9); } }
+  .cake-top { width: 170px; height: 50px; margin: 0 auto; background: white; border-bottom: 10px solid var(--lavender-dark); border-radius: 14px 14px 4px 4px; }
+  .cake-bottom { height: 64px; background: var(--light-purple); border-top: 8px solid var(--lavender-dark); border-radius: 4px 4px 14px 14px; }
+
+  /* confeti */
+  #confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+  .piece { position: absolute; top: -20px; width: 8px; height: 12px; animation: fall linear forwards; }
+  @keyframes fall { to { transform: translate(var(--drift), 105vh) rotate(720deg); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+    #confetti { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <p id="statusText"></p>
+  <div class="bar"><div id="barFill"></div></div>
+
+  <!-- Screen 1 -->
+  <section class="screen" data-step="1">
+    <h1>Verificación oficial de <span data-mom>mamá</span></h1>
+    <p>Hola, ¿tú eres mi <span data-mom>mamá</span>?</p>
+    <div class="buttons" id="idButtons">
+      <button onclick="showScreen(2)">Sí, soy yo</button>
+      <button class="secondary" onclick="denyAccess()">No</button>
+    </div>
+    <div id="denied" hidden>
+      <p>??? Acceso denegado. Esta página es exclusivamente para mi <span data-mom>mamá</span>.</p>
+      <button onclick="retryAccess()">Intentar otra vez</button>
+    </div>
+    <p class="note">Un proceso 100% serio y nada sospechoso.</p>
+  </section>
+
+  <!-- Screen 2 -->
+  <section class="screen" data-step="2" hidden>
+    <h2>¿Soy la favorita entre tus hijos?</h2>
+    <div class="buttons column" id="favButtons">
+      <button id="favYes" onclick="answerFavoriteYes()">Sí, obviamente</button>
+      <button id="favNo" class="secondary" onclick="answerFavoriteNo()">No</button>
+    </div>
+    <p id="favHint"></p>
+    <div id="thanks" hidden>
+      <p>Gracias por confirmar lo que ya sabíamos. 😌</p>
+      <button onclick="showScreen(3)">Continuar</button>
+    </div>
+  </section>
+
+  <!-- Screen 3 -->
+  <section class="screen" data-step="3" hidden>
+    <h2 id="dateQuestion"></h2>
+    <div class="buttons" id="dateButtons">
+      <button onclick="answerDate(true)">Sí</button>
+      <button class="secondary" onclick="answerDate(false)">No</button>
+    </div>
+    <div id="dateResult" hidden>
+      <p id="dateMessage"></p>
+      <button onclick="showScreen(4)">Ir a la celebración</button>
+    </div>
+  </section>
+
+  <!-- Screen 4 -->
+  <section class="screen" data-step="4" hidden>
+    <h2>Hora de la celebración</h2>
+    <p>Pide un deseo y sopla las velas.</p>
+    <div class="cake">
+      <div class="candles">
+        <div class="candle"><div class="flame"></div></div>
+        <div class="candle"><div class="flame"></div></div>
+        <div class="candle"><div class="flame"></div></div>
+      </div>
+      <div class="cake-top"></div>
+      <div class="cake-bottom"></div>
+    </div>
+    <button id="blowButton" onclick="blowCandles()">Soplar las velas</button>
+    <button id="specialButton" onclick="showScreen(5)" hidden>Ver mensaje especial</button>
+  </section>
+
+  <!-- Screen 5 -->
+  <section class="screen" data-step="5" hidden>
+    <h2>Para mi <span data-mom>mamá</span> 💜</h2>
+    <p id="finalMessage"></p>
+    <button class="secondary" onclick="location.reload()">Volver a empezar</button>
+  </section>
+</div>
+
+<div id="confetti"></div>
+
+<script>
+  // ===== BDAY VARIABLES =====
+  const MOM = "mamá";
+  const BIRTHDAY_MONTH = 10;   // as in october
+  const BIRTHDAY_DAY = 28;
+
+  const MONTHS = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
+                  "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+  const BIRTHDAY_TEXT = BIRTHDAY_DAY + " de " + MONTHS[BIRTHDAY_MONTH - 1];
+
+  const MESSAGE_CORRECT = `¡EXACTO! 🥳 Hoy es ${BIRTHDAY_TEXT}, el día en que nació mi persona favorita. ¡FELIZ CUMPLEAÑOS, ${MOM.toUpperCase()}!`;
+
+  const MESSAGE_WRONG = `Bueno, aunque hoy no sea ${BIRTHDAY_TEXT}, a ti te celebramos todo el año. ¡FELICIDADES, ${MOM.toUpperCase()}! Te mereces todo lo bonito del mundo.`;
+
+  const FINAL_MESSAGE = `Bueno, ${MOM}, después de esta rigurosa investigación científica, podemos confirmar que eres realmente mi ${MOM}, que soy tu hija favorita y que hoy es tu día especial.
+
+Espero que este nuevo año de vida te traiga mucha salud, felicidad y cosas bonitas. Gracias por todo lo que haces por mí y por ser tú. Te amo mucho. ¡Feliz cumpleaños! 💜`;
+  // =============================================
+
+  const statusLines = [
+    "Verificando identidad...",
+    "Analizando nivel de maternidad... 100%",
+    "Comparando con el calendario...",
+    "Preparando la celebración...",
+    "Documento aprobado ✔"
+  ];
+  const favHints = ["¿Segura? Piénsalo bien. 🤨", "Error. Intenta otra vez. 😌", "Última oportunidad..."];
+  const confettiColors = ["#ffffff", "#c9b0f2", "#7c3fd1", "#e9d8ff", "#ffd86b"];
+  let noClicks = 0;
+
+  const $ = (id) => document.getElementById(id);
+
+  // Put the name and bday date on the screen. If someone uses this, they could display their chosen person's bday
+  document.querySelectorAll("[data-mom]").forEach((el) => { el.textContent = MOM; });
+  $("dateQuestion").textContent = "¿Hoy es " + BIRTHDAY_TEXT + "?";
+  $("finalMessage").textContent = FINAL_MESSAGE;
+
+  function showScreen(step) {
+    document.querySelectorAll(".screen").forEach((screen) => {
+      screen.hidden = Number(screen.dataset.step) !== step;
+    });
+    $("statusText").textContent = "Paso " + step + " de 5 · " + statusLines[step - 1];
+    $("barFill").style.width = step * 20 + "%";
+  }
+
+  // Screen 1
+  function denyAccess() { $("idButtons").hidden = true; $("denied").hidden = false; }
+  function retryAccess() { $("denied").hidden = true; $("idButtons").hidden = false; }
+
+  // Screen 2: "Sí" grows and "No" gets smaller and moves until it disappears
+  function answerFavoriteYes() {
+    $("favButtons").hidden = true;
+    $("favHint").hidden = true;
+    $("thanks").hidden = false;
+  }
+  
+  function answerFavoriteNo() {
+    noClicks++;
+    if (noClicks >= 4) {
+      $("favNo").hidden = true;
+      $("favHint").textContent = "Ahora solo queda la respuesta correcta. 😌";
+      return;
+    }
+    const sideways = (Math.random() < 0.5 ? -1 : 1) * (30 + Math.random() * 40);
+    $("favNo").style.transform = "translateX(" + sideways + "px) scale(" + (1 - noClicks * 0.15) + ")";
+    $("favYes").style.fontSize = 1 + noClicks * 0.25 + "rem";
+    $("favHint").textContent = favHints[noClicks - 1];
+  }
+
+  // Screen 3: getMonth and getDate use the local time so there are no UTC issues
+  function answerDate(saidYes) {
+    const today = new Date();
+    const isBirthday = today.getMonth() + 1 === BIRTHDAY_MONTH && today.getDate() === BIRTHDAY_DAY;
+    $("dateMessage").textContent = (saidYes && isBirthday) ? MESSAGE_CORRECT : MESSAGE_WRONG;
+    $("dateButtons").hidden = true;
+    $("dateResult").hidden = false;
+  }
+
+  // Screen 4
+  function blowCandles() {
+    document.querySelectorAll(".flame").forEach((flame) => flame.classList.add("out"));
+    for (let i = 0; i < 40; i++) {
+      const piece = document.createElement("div");
+      piece.className = "piece";
+      piece.style.left = Math.random() * 100 + "%";
+      piece.style.background = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+      piece.style.setProperty("--drift", (Math.random() - 0.5) * 120 + "px");
+      piece.style.animationDuration = 2 + Math.random() * 2 + "s";
+      $("confetti").appendChild(piece);
+    }
+    setTimeout(() => { $("confetti").innerHTML = ""; }, 4500);
+    $("blowButton").hidden = true;
+    $("specialButton").hidden = false;
+  }
+
+  showScreen(1);
+</script>
+</body>
+</html>
